@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Data (auto-downloaded by TDC)
+tdc_data/
+data/
+
+# Models (too large for git)
+models/
+*.pt
+*.pkl
+
+# Results (keep JSON, ignore temp files)
+*.csv
+!results/*.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
