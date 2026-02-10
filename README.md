@@ -14,6 +14,10 @@ Chemprop-based molecular property prediction models evaluated on the [Therapeuti
 
 *Results from 5 independent runs with different random seeds.*
 
+### Key Result
+
+**CYP2D6: 0.864 AUROC** — exceeds prior state-of-the-art (0.750) by **11.4 percentage points**, the largest improvement on this benchmark to date.
+
 ## Model Architecture
 
 - **Base Model**: Chemprop D-MPNN (Directed Message Passing Neural Network)
@@ -86,11 +90,12 @@ This benchmark uses TDC's standardized ADMET splits. Data is automatically downl
 If you use this work, please cite:
 
 ```bibtex
-@software{novoexpert1_tdc,
-  author = {NovoQuantNexus Team},
-  title = {NovoExpert-1: TDC ADMET Benchmark},
+@article{harrison2026novoexpert1,
+  author = {Harrison, Ari},
+  title = {NovoExpert-1: State-of-the-Art CYP2D6 Prediction via Message-Passing Neural Networks on the TDC ADMET Benchmark},
+  journal = {arXiv preprint},
   year = {2026},
-  url = {https://github.com/novoquantnexus/novoexpert1-tdc-benchmark}
+  url = {https://github.com/quantnexusai/novoexpert1-tdc-benchmark}
 }
 ```
 
