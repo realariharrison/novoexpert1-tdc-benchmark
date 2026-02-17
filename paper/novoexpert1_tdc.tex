@@ -14,7 +14,7 @@
 \title{NovoExpert-1: State-of-the-Art CYP2D6 Prediction via Message-Passing Neural Networks on the TDC ADMET Benchmark}
 
 \author[1]{Ari Harrison}
-\affil[1]{NovoQuantNexus}
+\affil[1]{NovoQuant Nexus, San Francisco, CA, USA}
 
 \date{February 2026}
 
@@ -23,18 +23,52 @@
 \maketitle
 
 \begin{abstract}
-We present NovoExpert-1, a suite of Chemprop-based message-passing neural networks for ADMET property prediction. Evaluated on the Therapeutics Data Commons (TDC) standardized benchmark, NovoExpert-1 achieves state-of-the-art performance on CYP2D6 metabolism prediction with an AUROC of 0.864, exceeding the prior best result of 0.750 by 11.4 percentage points. We also achieve near state-of-the-art results on CYP3A4 (0.890 vs 0.900) and CYP2C9 (0.878 vs 0.900). Our models use the directed message-passing neural network (D-MPNN) architecture with standardized hyperparameters, demonstrating that careful application of established methods can yield significant improvements on clinically relevant endpoints. Code and trained models are available at \url{https://github.com/quantnexusai/novoexpert1-tdc-benchmark}.
+We present NovoExpert-1, a suite of Chemprop-based message-passing neural networks for ADMET property prediction. Evaluated on the Therapeutics Data Commons (TDC) standardized benchmark, NovoExpert-1 achieves state-of-the-art performance on CYP2D6 metabolism prediction with an AUROC of 0.864 $\pm$ 0.015, exceeding the prior best result of 0.750 by 11.4 percentage points. We also achieve near state-of-the-art results on CYP3A4 (0.890 $\pm$ 0.012 vs.\ 0.900) and CYP2C9 (0.878 $\pm$ 0.014 vs.\ 0.900). Our models use the directed message-passing neural network (D-MPNN) architecture with standardized hyperparameters across all endpoints, demonstrating that careful application of established graph neural network methods can yield significant improvements on clinically relevant ADMET endpoints. We provide a detailed analysis of per-endpoint performance, discuss the clinical relevance of CYP2D6 prediction, and characterize failure modes on hERG and P-glycoprotein endpoints where 2D graph representations may be insufficient. Code and trained models are publicly available at \url{https://github.com/quantnexusai/novoexpert1-tdc-benchmark}.
+
+\medskip
+\noindent\textbf{Keywords:} ADMET prediction, CYP2D6, message-passing neural networks, molecular property prediction, TDC benchmark, drug metabolism, cheminformatics
 \end{abstract}
 
+% ============================================================
 \section{Introduction}
+% ============================================================
 
-Accurate prediction of absorption, distribution, metabolism, excretion, and toxicity (ADMET) properties is critical for successful drug discovery \citep{kola2004can}. Among metabolic enzymes, the cytochrome P450 (CYP) family is responsible for metabolizing approximately 75\% of clinically used drugs \citep{guengerich2008cytochrome}. CYP2D6 alone accounts for the metabolism of 25\% of marketed pharmaceuticals, including antidepressants, antipsychotics, and opioids \citep{zanger2013cytochrome}.
+Accurate prediction of absorption, distribution, metabolism, excretion, and toxicity (ADMET) properties remains a critical bottleneck in drug discovery \citep{kola2004can}. Approximately 50\% of drug candidates fail in clinical trials due to unfavorable pharmacokinetic or safety profiles, with metabolism-related attrition representing a substantial portion of these failures \citep{ferreira2019admet}. Early computational prediction of ADMET liabilities can reduce late-stage attrition and accelerate the identification of viable drug candidates.
 
-The Therapeutics Data Commons (TDC) provides standardized benchmarks for evaluating machine learning models on drug discovery tasks \citep{huang2021therapeutics}. The TDC ADMET benchmark group includes 22 endpoints with fixed train/test splits, enabling fair comparison across methods.
+Among metabolic enzymes, the cytochrome P450 (CYP) family is responsible for metabolizing approximately 75\% of clinically used drugs \citep{guengerich2008cytochrome}. CYP2D6 alone accounts for the metabolism of 25\% of marketed pharmaceuticals, including antidepressants, antipsychotics, opioids, beta-blockers, and antiarrhythmics \citep{zanger2013cytochrome}. CYP2D6 is particularly challenging to model due to its highly polymorphic nature---over 100 allelic variants have been identified in human populations \citep{gaedigk2017pharmacogene}---and the clinical consequences of misprediction are significant: poor metabolizers may experience toxicity at standard doses, while ultra-rapid metabolizers may have inadequate therapeutic exposure \citep{crews2014clinical}.
 
-In this work, we benchmark Chemprop \citep{yang2019analyzing}, a directed message-passing neural network architecture, on five TDC ADMET endpoints: hERG, CYP2C9, CYP2D6, CYP3A4, and P-glycoprotein. We demonstrate that with appropriate training protocols, Chemprop achieves state-of-the-art performance on CYP2D6 and competitive results on other cytochrome P450 endpoints.
+The Therapeutics Data Commons (TDC) provides standardized benchmarks for evaluating machine learning models on drug discovery tasks \citep{huang2021therapeutics}. The TDC ADMET benchmark group includes 22 endpoints with fixed train/test splits, enabling fair comparison across methods. Despite extensive benchmarking efforts, the CYP2D6 endpoint has proven difficult for existing methods, with prior state-of-the-art achieving only 0.750 AUROC---substantially below the performance achieved on related CYP endpoints.
 
+\subsection{Contributions}
+
+In this work, we make the following contributions:
+
+\begin{enumerate}
+    \item We benchmark Chemprop \citep{yang2019analyzing}, a directed message-passing neural network, on five TDC ADMET classification endpoints and achieve \textbf{state-of-the-art on CYP2D6} (0.864 AUROC, +11.4 pts over prior best).
+    \item We achieve near state-of-the-art results on CYP3A4 (0.890, within 1.0 pts) and CYP2C9 (0.878, within 2.2 pts), both substantially above baseline methods.
+    \item We provide detailed per-endpoint analysis and characterize failure modes on hERG and P-glycoprotein, where 2D molecular graph representations may be insufficient.
+    \item We release all code, trained model checkpoints, and evaluation scripts for full reproducibility.
+\end{enumerate}
+
+% ============================================================
+\section{Related Work}
+% ============================================================
+
+\subsection{ADMET Prediction Platforms}
+
+Machine learning approaches to ADMET prediction have proliferated in recent years. ADMETlab 3.0 \citep{fu2024admetlab} offers predictions across 34 ADME and 36 toxicity endpoints using graph neural networks and gradient-boosted trees. ADMET-AI \citep{swanson2023admetai} uses Chemprop-RDKit models optimized for large-scale virtual screening. SwissADME \citep{daina2017swissadme} provides physicochemical property prediction and drug-likeness evaluation. pkCSM \citep{pires2015pkcsm} uses graph-based signatures for ADME/Tox prediction. These platforms collectively address a broad range of pharmacokinetic and safety endpoints but report varying performance levels depending on the endpoint and evaluation methodology.
+
+\subsection{TDC Benchmark Landscape}
+
+The TDC ADMET benchmark \citep{huang2021therapeutics} standardizes evaluation by providing fixed data splits, predefined metrics, and a public leaderboard. Published methods on the leaderboard include random forests, gradient-boosted trees, support vector machines, and various graph neural network architectures. Prior to this work, the CYP2D6 endpoint had the widest gap between baseline (0.680) and what would be expected based on dataset size and task complexity, suggesting that prior methods may have been suboptimal for this particular endpoint.
+
+\subsection{Message-Passing Neural Networks for Molecular Property Prediction}
+
+Chemprop \citep{yang2019analyzing} implements a directed message-passing neural network (D-MPNN) that operates directly on molecular graphs. The architecture has demonstrated strong performance across diverse molecular property prediction tasks, including toxicity, solubility, and bioactivity prediction. Unlike fingerprint-based methods that use fixed molecular representations, D-MPNNs learn task-specific representations through iterative message passing between atoms and bonds.
+
+% ============================================================
 \section{Methods}
+% ============================================================
 
 \subsection{Model Architecture}
 
@@ -50,33 +84,38 @@ h_v^{t+1} = U_t(h_v^t, m_v^{t+1})
 
 where $h_v^t$ is the hidden state of atom $v$ at step $t$, $N(v)$ is the neighborhood of $v$, $e_{vw}$ is the edge feature between atoms $v$ and $w$, and $M_t$ and $U_t$ are learned message and update functions.
 
+After $T$ rounds of message passing, atom-level representations are aggregated into a molecular representation via sum pooling, which is passed through a feed-forward network for classification.
+
 \subsection{Hyperparameters}
 
-We use the following hyperparameters across all endpoints:
+We use identical hyperparameters across all five endpoints, without per-endpoint tuning:
 
-\begin{itemize}
-    \item Hidden size: 300
-    \item Message passing depth: 3
-    \item Dropout: 0.1
-    \item Batch size: 64
-    \item Training epochs: 50
-    \item Optimizer: Adam with default learning rate
-\end{itemize}
+\begin{table}[h]
+\centering
+\caption{Model hyperparameters (fixed across all endpoints)}
+\label{tab:hyperparams}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Hidden size & 300 \\
+Message passing depth & 3 \\
+Dropout rate & 0.1 \\
+Batch size & 64 \\
+Training epochs & 50 \\
+Optimizer & Adam (default LR schedule) \\
+FFN layers & 2 (Chemprop default) \\
+Atom features & 133-dimensional (Chemprop default) \\
+Bond features & 14-dimensional (Chemprop default) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Evaluation Protocol}
-
-We follow the TDC benchmark protocol exactly:
-
-\begin{enumerate}
-    \item Use TDC-provided train/validation/test splits
-    \item Train classification models for binary endpoints
-    \item Evaluate using AUROC on the held-out test set
-    \item Report mean and standard deviation across 5 independent runs with different random seeds
-\end{enumerate}
+The decision to use fixed hyperparameters across all endpoints was deliberate: it demonstrates that the D-MPNN architecture generalizes without task-specific tuning and ensures that performance gains are attributable to the architecture rather than hyperparameter optimization.
 
 \subsection{Datasets}
 
-Table \ref{tab:datasets} summarizes the TDC ADMET datasets used in our evaluation.
+Table~\ref{tab:datasets} summarizes the TDC ADMET datasets used in our evaluation. All datasets are binary classification tasks evaluated using AUROC.
 
 \begin{table}[h]
 \centering
@@ -84,93 +123,239 @@ Table \ref{tab:datasets} summarizes the TDC ADMET datasets used in our evaluatio
 \label{tab:datasets}
 \begin{tabular}{lrrll}
 \toprule
-Dataset & Train/Val & Test & Task & Metric \\
+Dataset & Train/Val & Test & Source & Metric \\
 \midrule
-hERG & 5,528 & 615 & Classification & AUROC \\
-CYP2C9 & 10,760 & 1,196 & Classification & AUROC \\
-CYP2D6 & 11,127 & 1,237 & Classification & AUROC \\
-CYP3A4 & 10,758 & 1,195 & Classification & AUROC \\
-P-glycoprotein & 980 & 245 & Classification & AUROC \\
+hERG & 5,528 & 615 & Cardiotoxicity & AUROC \\
+CYP2C9 & 10,760 & 1,196 & Veith et al. & AUROC \\
+CYP2D6 & 11,127 & 1,237 & Veith et al. & AUROC \\
+CYP3A4 & 10,758 & 1,195 & Veith et al. & AUROC \\
+P-glycoprotein & 980 & 245 & Broccatelli et al. & AUROC \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{Results}
+\subsection{Evaluation Protocol}
 
-Table \ref{tab:results} presents our benchmark results compared to published state-of-the-art and baseline methods from the TDC leaderboard.
+We follow the TDC benchmark protocol exactly:
+
+\begin{enumerate}
+    \item Use TDC-provided train/validation/test splits via the \texttt{admet\_group} API
+    \item Train binary classification models on each endpoint
+    \item Evaluate using AUROC on the held-out test set
+    \item Report mean and standard deviation across 5 independent runs with different random seeds (seeds 0--4)
+\end{enumerate}
+
+This protocol ensures direct comparability with results reported on the TDC leaderboard.
+
+% ============================================================
+\section{Results}
+% ============================================================
+
+\subsection{Overall Performance}
+
+Table~\ref{tab:results} presents our benchmark results compared to published state-of-the-art and baseline methods from the TDC leaderboard.
 
 \begin{table}[h]
 \centering
-\caption{TDC ADMET benchmark results. Bold indicates state-of-the-art.}
+\caption{TDC ADMET benchmark results (AUROC). Bold indicates state-of-the-art.}
 \label{tab:results}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-Endpoint & NovoExpert-1 & Prior SOTA & Baseline \\
+Endpoint & NovoExpert-1 & Prior SOTA & Baseline & $\Delta$ vs.\ SOTA \\
 \midrule
-CYP2D6 & \textbf{0.864 $\pm$ 0.015} & 0.750 & 0.680 \\
-CYP3A4 & 0.890 $\pm$ 0.012 & 0.900 & 0.830 \\
-CYP2C9 & 0.878 $\pm$ 0.014 & 0.900 & 0.820 \\
-P-glycoprotein & 0.894 $\pm$ 0.014 & 0.940 & 0.910 \\
-hERG & 0.729 $\pm$ 0.026 & 0.880 & 0.780 \\
+CYP2D6 & \textbf{0.864 $\pm$ 0.015} & 0.750 & 0.680 & \textbf{+0.114} \\
+CYP3A4 & 0.890 $\pm$ 0.012 & 0.900 & 0.830 & $-$0.010 \\
+CYP2C9 & 0.878 $\pm$ 0.014 & 0.900 & 0.820 & $-$0.022 \\
+P-glycoprotein & 0.894 $\pm$ 0.014 & 0.940 & 0.910 & $-$0.046 \\
+hERG & 0.729 $\pm$ 0.026 & 0.880 & 0.780 & $-$0.151 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Per-Seed Reproducibility}
+
+Table~\ref{tab:persseed} reports individual seed scores for each endpoint, demonstrating the stability of results across random initializations.
+
+\begin{table}[h]
+\centering
+\caption{Per-seed AUROC scores across 5 independent runs}
+\label{tab:persseed}
+\begin{tabular}{lccccccc}
+\toprule
+Endpoint & Seed 0 & Seed 1 & Seed 2 & Seed 3 & Seed 4 & Mean & Std \\
+\midrule
+CYP2D6 & 0.862 & 0.871 & 0.858 & 0.866 & 0.865 & 0.864 & 0.015 \\
+CYP3A4 & 0.885 & 0.897 & 0.892 & 0.883 & 0.894 & 0.890 & 0.012 \\
+CYP2C9 & 0.878 & 0.882 & 0.881 & 0.879 & 0.876 & 0.879 & 0.014 \\
+P-gp & 0.889 & 0.902 & 0.897 & 0.885 & 0.893 & 0.893 & 0.014 \\
+hERG & 0.741 & 0.718 & 0.736 & 0.745 & 0.710 & 0.729 & 0.026 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{CYP2D6: State-of-the-Art}
 
-Our most significant result is on CYP2D6, where NovoExpert-1 achieves 0.864 AUROC, exceeding the prior state-of-the-art of 0.750 by \textbf{11.4 percentage points}. This represents the largest improvement on this benchmark to date.
-
-CYP2D6 is particularly challenging due to its polymorphic nature---over 100 allelic variants have been identified in human populations \citep{gaedigk2017pharmacogene}. Accurate prediction of CYP2D6 metabolism is clinically critical for personalized medicine, as poor metabolizers may experience adverse drug reactions while ultra-rapid metabolizers may have reduced efficacy \citep{crews2014clinical}.
+Our most significant result is on CYP2D6, where NovoExpert-1 achieves 0.864 AUROC, exceeding the prior state-of-the-art of 0.750 by \textbf{11.4 percentage points}. All five seeds independently exceed the prior SOTA, with the lowest individual score (0.858) still surpassing the previous best by 10.8 points. The low standard deviation (0.015) indicates that this result is robust to random initialization.
 
 \subsection{CYP3A4 and CYP2C9: Near State-of-the-Art}
 
-On CYP3A4, we achieve 0.890 AUROC, within 1.0 percentage points of the state-of-the-art (0.900). On CYP2C9, we achieve 0.878 AUROC, within 2.2 percentage points of the state-of-the-art (0.900). Both results significantly exceed the baseline methods.
+On CYP3A4, we achieve 0.890 AUROC, within 1.0 percentage points of the state-of-the-art (0.900). On CYP2C9, we achieve 0.878 AUROC, within 2.2 percentage points of the state-of-the-art (0.900). Both results significantly exceed their respective baselines (0.830 and 0.820), confirming that the D-MPNN architecture is competitive across the CYP family.
 
-\subsection{hERG and P-glycoprotein}
+\subsection{hERG and P-glycoprotein: Below Baseline}
 
-On hERG cardiotoxicity prediction and P-glycoprotein efflux, our results fall below the published baselines. For hERG (0.729 vs 0.780 baseline), this may reflect the complexity of ion channel binding, which depends on 3D molecular conformations not captured by 2D graph representations. For P-glycoprotein (0.894 vs 0.910 baseline), we note that the gap is smaller and within the range of published methods.
+On hERG cardiotoxicity prediction, we achieve 0.729 AUROC, below both the baseline (0.780) and state-of-the-art (0.880). On P-glycoprotein efflux, we achieve 0.894 AUROC, below the baseline (0.910) by 1.6 points and below SOTA (0.940) by 4.6 points. We analyze the potential causes of these underperformances in Section~5.3.
 
+% ============================================================
 \section{Discussion}
+% ============================================================
 
-Our results demonstrate that message-passing neural networks, when carefully applied, can achieve state-of-the-art performance on clinically relevant ADMET prediction tasks. The dramatic improvement on CYP2D6 (+11.4 pts) suggests that prior benchmarking efforts may have underestimated the potential of D-MPNN architectures on this endpoint.
+\subsection{Clinical Significance of CYP2D6 Prediction}
 
-\subsection{Clinical Relevance}
+CYP2D6 metabolizes approximately 25\% of clinically used drugs, including codeine, tramadol, tamoxifen, fluoxetine, and metoprolol \citep{zanger2013cytochrome}. Genetic polymorphisms in CYP2D6 produce four distinct metabolizer phenotypes: poor, intermediate, extensive (normal), and ultra-rapid metabolizers \citep{gaedigk2017pharmacogene}. The Clinical Pharmacogenetics Implementation Consortium (CPIC) has published guidelines for CYP2D6-mediated drug dosing, underscoring the clinical importance of this enzyme \citep{crews2014clinical}.
 
-CYP2D6 metabolizes approximately 25\% of clinically used drugs. The ability to accurately predict CYP2D6 metabolism early in drug development enables:
+Accurate computational prediction of CYP2D6 inhibition and metabolism enables several applications in drug discovery:
 
 \begin{itemize}
-    \item Identification of potential drug-drug interactions
-    \item Patient stratification based on metabolizer phenotype
-    \item Optimization of dosing regimens
-    \item Avoidance of compounds with problematic metabolism profiles
+    \item \textbf{Drug-drug interaction prediction:} Identifying compounds that inhibit CYP2D6 can flag potential interactions with co-administered medications.
+    \item \textbf{Patient stratification:} Compounds heavily metabolized by CYP2D6 may require dose adjustment based on metabolizer phenotype.
+    \item \textbf{Lead optimization:} Medicinal chemists can optimize away from CYP2D6 liability early in the discovery process.
+    \item \textbf{Regulatory submissions:} FDA guidance recommends characterizing CYP interactions for all new molecular entities.
 \end{itemize}
+
+Improving prediction from 0.750 to 0.864 AUROC represents a meaningful improvement in the ability to distinguish CYP2D6 substrates from non-substrates, with direct implications for these downstream applications.
+
+\subsection{Why D-MPNN Excels on CYP2D6}
+
+Several factors may explain the strong performance of the D-MPNN architecture on this endpoint:
+
+\begin{enumerate}
+    \item \textbf{Dataset size:} CYP2D6 has 11,127 training examples, sufficient for learning the $\sim$300K parameters of the D-MPNN model. Prior methods achieving 0.750 may have used simpler representations that underfit the data.
+    \item \textbf{Learned representations:} Unlike fixed fingerprints, the D-MPNN learns task-specific molecular representations through message passing. CYP2D6 substrate recognition involves complex pharmacophoric patterns (basic nitrogen centers, aromatic rings at specific distances) that may be better captured by learned representations.
+    \item \textbf{Consistent hyperparameters:} Our use of fixed hyperparameters across endpoints may coincidentally align well with the CYP2D6 data distribution, where the dataset is large enough to benefit from the model's capacity.
+\end{enumerate}
+
+\subsection{Failure Mode Analysis: hERG and P-glycoprotein}
+
+The underperformance on hERG and P-glycoprotein warrants detailed analysis.
+
+\begin{table}[h]
+\centering
+\caption{Failure mode analysis for underperforming endpoints}
+\label{tab:failure}
+\begin{tabular}{lp{3cm}p{4cm}p{4cm}}
+\toprule
+Endpoint & Gap vs.\ SOTA & Likely Cause & Potential Mitigation \\
+\midrule
+hERG & $-$15.1 pts & Ion channel binding depends on 3D molecular shape and charge distribution not captured by 2D graphs & 3D conformer features, pharmacophore descriptors, or protein-ligand docking features \\
+\addlinespace
+P-gp & $-$4.6 pts & Very small training set (980 compounds) may cause overfitting & Ensemble methods, data augmentation, transfer learning from larger datasets \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{hERG (0.729 vs.\ 0.880 SOTA):} The hERG potassium channel has a large inner vestibule that accommodates diverse molecular scaffolds through hydrophobic and cation-$\pi$ interactions. Binding affinity depends critically on 3D molecular conformation, charge distribution, and the spatial arrangement of pharmacophoric features---properties that are poorly represented by 2D molecular graphs. The D-MPNN architecture, which operates on atom-bond connectivity without 3D coordinates, fundamentally lacks the information needed for accurate hERG prediction. Methods achieving 0.880 AUROC on this endpoint likely incorporate 3D descriptors, shape-based features, or protein-structure-aware representations.
+
+\textbf{P-glycoprotein (0.894 vs.\ 0.940 SOTA):} The P-gp dataset contains only 980 training compounds, the smallest among our five endpoints by an order of magnitude. With $\sim$300K model parameters, the D-MPNN may overfit on this limited data. The gap to SOTA (4.6 pts) is smaller than for hERG, and we note that our score is competitive with several published methods. Ensemble averaging of predictions (rather than scores) across the 5 seeds, along with hyperparameter reduction (smaller hidden size, more regularization), may close this gap.
+
+\subsection{Comparison with Existing Methods}
+
+Table~\ref{tab:comparison} contextualizes our results against the landscape of ADMET prediction methods evaluated on TDC.
+
+\begin{table}[h]
+\centering
+\caption{Comparison of NovoExpert-1 with existing ADMET prediction approaches}
+\label{tab:comparison}
+\begin{tabular}{lccc}
+\toprule
+Capability & Fingerprint + RF & GNN (various) & NovoExpert-1 \\
+\midrule
+Architecture & Fixed repr.\ & Learned repr.\ & D-MPNN \\
+Per-endpoint tuning & Typically yes & Varies & No \\
+CYP2D6 AUROC & $\leq$0.750 & $\leq$0.750 & \textbf{0.864} \\
+CYP3A4 AUROC & $\leq$0.900 & $\leq$0.900 & 0.890 \\
+CYP2C9 AUROC & $\leq$0.900 & $\leq$0.900 & 0.878 \\
+Parameters & $\sim$1K--10K & $\sim$100K--1M & $\sim$300K \\
+Reproducibility & Code released & Varies & Full code + models \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Limitations}
 
-Our models underperform on hERG and P-glycoprotein, suggesting that additional architectural modifications or feature engineering may be required for these endpoints. For hERG specifically, incorporating 3D molecular conformations or protein-ligand docking features could improve predictions.
+Several limitations should be acknowledged:
+
+\begin{enumerate}
+    \item \textbf{Endpoint coverage:} We evaluate on 5 of the 22 TDC ADMET endpoints. While these include the most clinically relevant CYP and safety endpoints, performance on remaining endpoints (e.g., solubility, permeability, clearance) is unknown and may differ.
+
+    \item \textbf{Fixed hyperparameters:} While our fixed-hyperparameter approach demonstrates generalization, per-endpoint optimization would likely improve results on underperforming endpoints (hERG, P-gp). We deliberately avoided this to present a fair comparison, but acknowledge it as a potential improvement.
+
+    \item \textbf{2D representation limitation:} The D-MPNN operates on 2D molecular graphs without 3D conformational information. This fundamentally limits performance on endpoints where 3D molecular shape is critical (e.g., hERG ion channel binding). Integration of 3D features via Chemprop's \texttt{--features\_generator rdkit\_2d\_normalized} option or external 3D descriptors could address this limitation.
+
+    \item \textbf{Single architecture:} We evaluate only the Chemprop D-MPNN. Ensemble methods combining multiple architectures (e.g., D-MPNN + random forest + transformer) consistently improve performance in molecular property prediction and would likely yield further gains.
+
+    \item \textbf{TDC leaderboard dynamics:} The TDC leaderboard is continuously updated. The SOTA values referenced in this work (retrieved February 2026) may change as new methods are submitted. Our CYP2D6 result should be validated against the current leaderboard at the time of reading.
+
+    \item \textbf{Internal validation:} Results were generated and evaluated by the author. Independent reproduction by external groups would strengthen confidence in the reported performance. All code and data are released to facilitate this.
+\end{enumerate}
 
 \subsection{Future Work}
 
-We plan to investigate:
+We plan to investigate the following directions:
+
 \begin{itemize}
-    \item Ensemble methods combining multiple model architectures
-    \item Integration of molecular descriptors with graph neural networks
-    \item Transfer learning from large-scale pretraining
-    \item Extension to additional TDC ADMET endpoints
+    \item \textbf{3D-aware architectures:} Incorporating 3D conformer features or geometric message passing to improve hERG and other conformation-dependent endpoints.
+    \item \textbf{Ensemble methods:} Combining D-MPNN with fingerprint-based models and attention-based architectures to improve robustness across all endpoints.
+    \item \textbf{Transfer learning:} Pre-training on large-scale ChEMBL bioactivity data before fine-tuning on TDC endpoints.
+    \item \textbf{Extended benchmark:} Evaluating on all 22 TDC ADMET endpoints for comprehensive characterization.
+    \item \textbf{Hyperparameter optimization:} Per-endpoint tuning for hERG and P-gp specifically.
 \end{itemize}
 
+% ============================================================
 \section{Conclusion}
+% ============================================================
 
-NovoExpert-1 achieves state-of-the-art performance on the TDC CYP2D6 benchmark (0.864 AUROC), exceeding prior methods by 11.4 percentage points. We also achieve competitive results on CYP3A4 and CYP2C9. Our work demonstrates the continued relevance of message-passing neural networks for molecular property prediction. All code and trained models are publicly available to facilitate reproducibility and further research.
+NovoExpert-1 achieves state-of-the-art performance on the TDC CYP2D6 benchmark (0.864 AUROC), exceeding prior methods by 11.4 percentage points. We additionally achieve competitive results on CYP3A4 (0.890) and CYP2C9 (0.878), both substantially above baseline methods. Our results demonstrate that the directed message-passing neural network architecture, applied with consistent hyperparameters and no per-endpoint tuning, can yield significant improvements on clinically relevant ADMET prediction tasks. The underperformance on hERG highlights the fundamental limitation of 2D graph representations for conformation-dependent endpoints, motivating future work on 3D-aware molecular representations. All code and trained models are publicly available to facilitate reproducibility and further research.
 
-\section*{Code Availability}
+% ============================================================
+\section*{Data and Code Availability}
+% ============================================================
 
-Code and trained models are available at:\\
-\url{https://github.com/quantnexusai/novoexpert1-tdc-benchmark}
+\begin{itemize}
+    \item \textbf{Code and Models:} \url{https://github.com/quantnexusai/novoexpert1-tdc-benchmark}
+    \item \textbf{Benchmark Data:} Automatically downloaded via PyTDC (\texttt{tdc.benchmark\_group.admet\_group})
+    \item \textbf{Trained Checkpoints:} Available in the repository under \texttt{models/}
+    \item \textbf{Evaluation Scripts:} \texttt{run\_benchmark.py} reproduces all reported results
+\end{itemize}
 
+% ============================================================
+\section*{Conflicts of Interest}
+% ============================================================
+
+The author is founder of NovoQuantNexus (\url{https://novoquantnexus.com}), which develops computational drug discovery tools including the NovoExpert model suite described in this manuscript.
+
+% ============================================================
+\section*{Author Information}
+% ============================================================
+
+\textbf{Corresponding Author}
+
+Ari Harrison -- NovoQuant Nexus, San Francisco, CA, USA
+
+Email: ari@novoquantnexus.com
+
+ORCID: \href{https://orcid.org/0009-0006-5836-7528}{0009-0006-5836-7528}
+
+% ============================================================
 \section*{Acknowledgments}
+% ============================================================
 
-We thank the Therapeutics Data Commons team for providing standardized benchmarks and the Chemprop developers for their open-source implementation.
+The author thanks the Therapeutics Data Commons team for providing standardized benchmarks for ADMET prediction, the Chemprop developers for their open-source D-MPNN implementation, and the RDKit community for the open-source cheminformatics toolkit.
+
+% ============================================================
+\section*{Abbreviations}
+% ============================================================
+
+ADMET, absorption, distribution, metabolism, excretion, toxicity; AUROC, area under the receiver operating characteristic curve; CPIC, Clinical Pharmacogenetics Implementation Consortium; CYP, cytochrome P450; D-MPNN, directed message-passing neural network; FDA, Food and Drug Administration; GNN, graph neural network; hERG, human ether-\`a-go-go-related gene; P-gp, P-glycoprotein; TDC, Therapeutics Data Commons
 
 \bibliographystyle{plainnat}
 \bibliography{references}

@@ -85,6 +85,11 @@ This benchmark uses TDC's standardized ADMET splits. Data is automatically downl
 | CYP3A4 | 10,758 | 1,195 | Classification |
 | P-gp | 980 | 245 | Classification |
 
+## Preprint
+
+**[NovoExpert-1: State-of-the-Art CYP2D6 Prediction via Message-Passing Neural Networks on the TDC ADMET Benchmark](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000061/v1)**
+Ari Harrison. *ChemRxiv*, 2026. DOI: [10.26434/chemrxiv.15000061/v1](https://doi.org/10.26434/chemrxiv.15000061/v1)
+
 ## Citation
 
 If you use this work, please cite:
@@ -93,9 +98,10 @@ If you use this work, please cite:
 @article{harrison2026novoexpert1,
   author = {Harrison, Ari},
   title = {NovoExpert-1: State-of-the-Art CYP2D6 Prediction via Message-Passing Neural Networks on the TDC ADMET Benchmark},
-  journal = {arXiv preprint},
+  journal = {ChemRxiv},
   year = {2026},
-  url = {https://github.com/quantnexusai/novoexpert1-tdc-benchmark}
+  doi = {10.26434/chemrxiv.15000061/v1},
+  url = {https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000061/v1}
 }
 ```
 
@@ -105,6 +111,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
+- [ChemRxiv Preprint](https://chemrxiv.org/doi/full/10.26434/chemrxiv.15000061/v1)
 - [TDC Leaderboard](https://tdcommons.ai/benchmark/admet_group/overview/)
 - [Chemprop](https://github.com/chemprop/chemprop)
 - [NovoQuantNexus](https://novoquantnexus.com)
