@@ -1,0 +1,18 @@
+{
+  "endpoint": "dili",
+  "task": "classification",
+  "metric": "auroc",
+  "published_sota": 0.916,
+  "v1_score": 0.9052,
+  "v2_catboost_score": 0.9056521739130434,
+  "v2_chemprop_score": 0.9217391304347826,
+  "v2_ensemble_score": 0.9056521739130434,
+  "cb_weight": 1.0,
+  "cp_weight": 0.0,
+  "beats_sota": false,
+  "beats_v1": true,
+  "delta_sota": -0.010347826086956613,
+  "delta_v1": 0.0004521739130434188,
+  "feature_dim": 4064,
+  "timestamp": "2026-04-05T20:41:20.006388"
+}

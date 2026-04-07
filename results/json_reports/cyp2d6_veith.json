@@ -1,0 +1,24 @@
+{
+  "endpoint": "cyp2d6_veith",
+  "task": "classification",
+  "metric": "auprc",
+  "published_sota": 0.75,
+  "mean_score": 0.7734026487623826,
+  "std_score": 0.0019680570777342856,
+  "seed_scores": [
+    0.7754893790499022,
+    0.7710893184192122,
+    0.774107319412824,
+    0.7752907554753171,
+    0.7710364714546574
+  ],
+  "ensemble_score": 0.7775978049319878,
+  "beats_sota": true,
+  "delta": 0.027597804931987824,
+  "feature_dim": 2873,
+  "has_gin": true,
+  "n_train_val": 10504,
+  "n_test": 2626,
+  "category": "metabolism",
+  "timestamp": "2026-04-04T19:10:04.358906"
+}

@@ -1,0 +1,24 @@
+{
+  "endpoint": "clearance_hepatocyte_az",
+  "task": "regression",
+  "metric": "spearman",
+  "published_sota": 0.487,
+  "mean_score": 0.5068049948140245,
+  "std_score": 0.007635123404204651,
+  "seed_scores": [
+    0.5147299204127299,
+    0.5036262535472602,
+    0.5170844035505107,
+    0.4992020936173571,
+    0.4993823029422648
+  ],
+  "ensemble_score": 0.5111811829376234,
+  "beats_sota": true,
+  "delta": 0.02418118293762339,
+  "feature_dim": 2873,
+  "has_gin": true,
+  "n_train_val": 970,
+  "n_test": 243,
+  "category": "excretion",
+  "timestamp": "2026-04-04T19:47:11.614440"
+}

@@ -1,0 +1,24 @@
+{
+  "endpoint": "cyp3a4_substrate_carbonmangels",
+  "task": "classification",
+  "metric": "auroc",
+  "published_sota": 0.656,
+  "mean_score": 0.6486889692585895,
+  "std_score": 0.012106451061617495,
+  "seed_scores": [
+    0.6550632911392406,
+    0.6661392405063291,
+    0.6335895117540686,
+    0.6365280289330922,
+    0.652124773960217
+  ],
+  "ensemble_score": 0.6600361663652803,
+  "beats_sota": true,
+  "delta": 0.004036166365280258,
+  "feature_dim": 2873,
+  "has_gin": true,
+  "n_train_val": 535,
+  "n_test": 135,
+  "category": "metabolism",
+  "timestamp": "2026-04-04T19:22:48.985802"
+}
