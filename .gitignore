@@ -12,10 +12,10 @@ venv/
 tdc_data/
 data/
 
-# Models (too large for git)
-models/
+# Large model artifacts (trained models are committed for reproducibility)
 *.pt
 *.pkl
+novoexpert2_trained_models.tar.gz
 
 # Results (keep JSON, ignore temp files)
 *.csv

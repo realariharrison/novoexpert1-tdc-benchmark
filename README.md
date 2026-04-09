@@ -56,7 +56,48 @@ MapLight features (2,573 dims)              GIN supervised masking (300 dims)
 - Uses the correct per-endpoint metric (AUPRC, AUROC, MAE, or Spearman)
 - GIN embeddings computed on CPU (DGL pip wheel is CPU-only); training runs fine on CPU or GPU
 
+## Data Availability
+
+All artifacts required for independent verification are included in this repository:
+
+| Artifact | Location | Description |
+|----------|----------|-------------|
+| Trained CatBoost models | `models/<endpoint>/seed_*.cbm` | 25 CatBoost models (5 endpoints x 5 seeds) |
+| Trained Chemprop models | `models/dili/chemprop_seed_*.ckpt` | 5 Chemprop v2 D-MPNN checkpoints for DILI |
+| Test predictions | `results/predictions/<endpoint>.npy` | NumPy arrays of test-set predictions (5 seeds x n_test) |
+| Per-endpoint scores | `results/json_reports/<endpoint>.json` | Seed-level and ensemble scores |
+| Full 22-endpoint results | `results/all_results.json` | Complete benchmark output |
+| Training/evaluation code | `run_benchmark.py` | End-to-end pipeline |
+| Validation script | `validate_models.py` | Load models, run inference, verify scores |
+| Reproduction script | `reproduce.py` | Retrain from scratch and compare |
+
+Benchmark data (TDC ADMET splits) is automatically downloaded by PyTDC on first run.
+
 ## Reproducing Results
+
+### Option 1: Validate Committed Models (fast, ~10 min)
+
+Load the pre-trained models, run inference on TDC test sets, and verify scores:
+
+```bash
+pip install -r requirements.txt
+python validate_models.py
+```
+
+### Option 2: Reproduce from Scratch (~30-45 min)
+
+Retrain all 5 SOTA endpoints from raw SMILES:
+
+```bash
+pip install -r requirements.txt
+python reproduce.py
+```
+
+### Option 3: Run Full 22-Endpoint Benchmark (~2 hours)
+
+```bash
+python run_benchmark.py --seeds 5
+```
 
 ### Prerequisites
 
@@ -69,28 +110,21 @@ Note: `dgl` may need to be installed from the DGL wheel index:
 pip install dgl -f https://data.dgl.ai/wheels/cu121/repo.html
 ```
 
-### Run Full Benchmark
-
-```bash
-# All 22 endpoints, 5 seeds each (~2 hours on a modern CPU)
-python run_benchmark.py --seeds 5
-
-# Resume from cached results
-python run_benchmark.py --seeds 5 --resume
-
-# Specific endpoints only
-python run_benchmark.py --endpoints cyp2d6_veith cyp3a4_veith --seeds 5
-```
-
 ### Output Structure
 
 ```
+models/
+├── cyp2d6_veith/seed_{0-4}.cbm           # CatBoost trained models
+├── cyp3a4_veith/seed_{0-4}.cbm
+├── cyp3a4_substrate_carbonmangels/seed_{0-4}.cbm
+├── clearance_hepatocyte_az/seed_{0-4}.cbm
+└── dili/chemprop_seed_{0-4}.ckpt          # Chemprop v2 checkpoints
+
 results/
-├── all_results.json               # aggregate summary across 22 endpoints
-├── tdc_sota_tracker.md            # human-readable tracker
-├── json_reports/<endpoint>.json   # per-endpoint scores (5 seeds + ensemble)
-├── predictions/<endpoint>.npy     # test predictions (5 seeds × n_test)
-└── models/<endpoint>_seed_*.cbm   # saved CatBoost models for inference (optional)
+├── all_results.json                        # Full 22-endpoint results
+├── json_reports/<endpoint>.json            # Per-endpoint seed + ensemble scores
+├── predictions/<endpoint>.npy              # Test predictions (5 seeds x n_test)
+└── tdc_sota_tracker.md
 ```
 
 ## Leaderboard Submissions

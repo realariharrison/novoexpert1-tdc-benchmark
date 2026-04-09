@@ -491,14 +491,18 @@ NovoExpert-2 achieves state-of-the-art performance on 5 of 22 TDC ADMET benchmar
 \section*{Data and Code Availability}
 % ============================================================
 
+All trained models, predictions, and code are publicly available at \url{https://github.com/realariharrison/novoexpert1-tdc-benchmark}. The repository contains:
 \begin{itemize}
-    \item \textbf{Code and Models:} \url{https://github.com/realariharrison/novoexpert1-tdc-benchmark}
+    \item \textbf{Trained Models:} 25 CatBoost model files (\texttt{models/<endpoint>/seed\_*.cbm}, 5 seeds $\times$ 5 endpoints) and 5 Chemprop v2 checkpoints (\texttt{models/dili/chemprop\_seed\_*.ckpt})
+    \item \textbf{Test Predictions:} NumPy arrays for all SOTA test sets (\texttt{results/predictions/<endpoint>.npy})
+    \item \textbf{Score Reports:} Per-endpoint JSON files with seed-level and ensemble scores (\texttt{results/json\_reports/})
+    \item \textbf{Training Pipeline:} \texttt{run\_benchmark.py} --- end-to-end feature computation, training, and evaluation
+    \item \textbf{Validation Script:} \texttt{validate\_models.py} --- loads pre-trained models, runs inference on TDC test splits, verifies reported scores
+    \item \textbf{Reproduction Script:} \texttt{reproduce.py} --- retrains all 5 SOTA endpoints from raw SMILES and compares to reported results
     \item \textbf{Benchmark Data:} Automatically downloaded via PyTDC (\texttt{tdc.benchmark\_group.admet\_group})
-    \item \textbf{Trained CatBoost Models:} Available in the repository under \texttt{results/models/} as \texttt{.cbm} files (5 seeds per endpoint)
-    \item \textbf{Prediction Files:} \texttt{results/predictions/} directory (5 seeds $\times$ n\_test per endpoint)
-    \item \textbf{Reproduction Script:} \texttt{run\_benchmark.py}
-    \item \textbf{Leaderboard Submission Materials:} \texttt{submissions/} directory
+    \item \textbf{Leaderboard Submissions:} \texttt{submissions/} directory with per-endpoint materials
 \end{itemize}
+All software is released under the MIT license.
 
 % ============================================================
 \section*{Conflicts of Interest}
